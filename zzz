@@ -1,0 +1,245 @@
+//express mysql e técnologia front end - html ->  EJS 
+//EJS Template ending -> desenha html
+//ele renderiza o html do node na rota  
+
+a pasta de htmls em um projeto com express devem ser salvos na pasta views - ele le por padrão
+estamos usando html com EJS
+
+EJS permite usar variaveis no html 
+
+ <%= nome %> // exibe o valor de uma variavel
+ <% if() %> //quando quiser trabalhar com uma condicional
+
+ forEach() é um função nativa de todo array, ele passa de elemento em elemento
+
+ Arquivos estaticos são os não processados no backend (imgs, css, etc)
+
+A pasta public por padrão é onde ficam os arquivos Estaticos!
+
+
+BOOTSTRAP
+para instalar o boottrap baixamos seus arquivos js e css e jogamos na pasta public (padrão para estaticos)
+em seguida temos de inicializar ele, então no arquivo html, criamos 2 scripts e colamos o popper (vc pega no site do BOOTSTRAP)
+para finalizar criamos mais um script no final do httml startando o bottstrap
+<script src="/js/bootstrap.min.js"></script>
+Lembrando q tem de ser nessa ordem
+Pronto, tudo ok manin! logo ao abrir um h1 vera em fonte diferente
+
+//Container centraliza tudo na Tela
+//tudo que ficar fora do container fica nas bordas
+
+//colocando a classe {
+    form-control fica no estilo do bootstrap
+    class="btn btn-success"> //verde
+    class="btn btn-primary"> //azul
+    class="btn btn-danger"> //vermelha
+
+quando utilizamos o bootstrap para utilizar um arquivo css junto, a importanção dele no html deve ficar depois da importanção do bootstrap
+
+Navbar no bootstrap
+<nav class="navbar navbar-light bg-light">
+A nave bar é padron no bootstrap primeiro passamos seu nome, depois sua cor e pra finalizar o tipo de texto
+class="navbar-brand"  essa classe vai alinhar a img a esquerda da navbar
+
+no css vh é uma unidade para a tela - 5vh == 5% da altura
+
+
+
+Começaremos agora utilizar partials
+elas servem para reutiliar código html, n ficar recriando
+<%- include partials/header.ejs %> include local/arqv
+para dar include é assim, separamos uma pasta partials dentro das diews e nela, criamos parte dos arquivos que sempre serão usados (navbar, footer, header, etcc)
+para incluir em algum html é o comando acima
+
+
+
+
+
+
+
+
+
+
+
+    <h1> Guia perguntas! </h1>
+    <hr>
+    <h3>Lista de perguntas</h3>
+
+    <p>Nome: <%= nome %> </p>
+    <p>Developer: <%= lang %> </p>
+    <p>Empresa: <%= empresa %> </p>
+    <p>Inscritos: <%= inscritos %> </p>
+    
+    <% if (msg == true){ %>
+        <h3> Isso é uma mensagem de erro</h3>
+        <%} else { %>
+            <h3> Nenhum erro</h3>
+            <%}%>
+    
+    <% produtos.forEach(function(produto){ %>
+        <hr>
+        <h3><%= produto.nome %> </h3>
+        <h4><%= produto.preco %></h4>
+    <%})%>
+    <img src="/img/Capturar3.PNG">
+
+    const express = require("express");
+const app = express()
+
+//configurando ejs
+app.set('view engine', 'ejs'); //dizendo para o express usar o ejs como engine
+app.use(express.static('public')) //definindo que vamos usar arquivos estaticos da pasta publica (padão)
+
+app.get("/:nome/:lang", (req, res)=> {
+    var nome = req.params.nome;
+    var lang = req.params.lang
+    var exibirMsg = false
+
+    var produtos = [
+        {nome: "Doritos", preco: 3.14},
+        {nome: "Coca-cola", preco:5.45},
+        {nome: "Leite", preco:1.45},
+        {nome: "Carne", preco:5.00},
+        {nome: "Redbull", preco:6.00},
+        {nome: "Nescau", preco: 7.00}
+]
+    res.render("index", {
+        nome: nome, 
+        lang: lang,
+        empresa: "Rowling classic",
+        inscritos: 1600, //Passando valores para view index - html
+        msg: exibirMsg,
+        produtos: produtos
+
+    }) //render - dizendo q vai desenhar o html na views - já pega por padrão na apasta views - le o nome
+})
+
+
+////
+app.listen(3000, ()=>{
+    console.log("App rodando!")
+})
+
+
+
+Trabalhando com formularios -> devemos definir com qual metodo eles serão enviados (GET ou POST)
+{ com get - os dados serão passados na url (deixa ela feia e dados expostos
+  com post os dados ficam escondidos dentro da requisição - dados não expostos 
+  Usamos rotas do tipo post, geralmente para receber dados de formulario 
+  )}
+
+  <form method="POST" action="/salvarpergunta
+  method Post envia os dados para a rota (action="rota")
+
+  Para pegar dados do FORM vamos instalar uma nova bibloteca chamada body parser
+  npm install body parser 
+  ele é uma extensão so express?
+  O body parser traduz os dados js em formulario para uma estrutura que de pra usar no backend
+ demos um nome para nosso inputs e importamos dentro da rota que envia os dados para o próxima pag, essas variavies nomeqvou subir = (req.body.nomedavar)
+
+Baixamos o MYSQLWORKBENCH para poder facilitar o uso do bd
+nele, autmoticamente conecta com nosso mysql padrão só por a senha e entrar
+
+SEQUELIZE - Para manipular o mysql (e outros bancos de dados) nesse caso o mysqlworkbench, vamos usar a bibloteca sequelize, ela permite manipular dados sql mas em formato js 
+insert into usuarios ->>> usuario.Criar({nome: "Victor"}).salvar()
+//como vamos usar o sequelize com mysql, nesse caso devemos instalar também o mysql2
+Criando a conexão do sequelize com mysql
+const Sequelize = require('sequelize');
+
+const connection = new Sequelize('guiaperguntas'//nomedobanco, 'root'//user, 'tatakaetatakae'//senha, {
+    host: 'localhost', //servr que vamos comunicar
+    dialect: 'mysql' /tipo de banco q vamos nos comunicar
+})
+
+//da pra criar tabelas atravéz do sequelize com js
+model => estrutura de dados que representa a sua tabela
+é uma boa pratica deixar arqvs model com letra maiuscula 
+
+Queremos salvar os dados do formulario de perguntas -> na tabela sql de perguntas
+para isso precisamos importar o model dessa tabela 
+em seguida usamos NOMEDAMODELEXPORTADA.create({
+    dadoqvamosadicionar: esseéodado
+}).then(()) //aqui é extra, para fazer algo quando der certo o comando
+    //inserindo dados na tabela sql
+    Pergunta.create({  
+        titulo: titulo,
+        descricao: descricao
+    }).then(()=>{
+        res.redirect("/") //função do express que redireciona o user para onde quisermos - no caso para pag principal
+    })
+
+//rotas
+app.get("/", (req, res)=> { 
+    //pergando dados da tabela Perguntas == SELECT * FROM perguntas
+    Pergunta.findAll({ raw: true }).then(perguntas => { //apos listar mande as perguntas para o then 
+        res.render("index", {
+            perguntas: perguntas //pega as perguntas e joga em uma array pra views
+        })
+    }) 
+}
+raq:true //signifca pegar só o + importante, nem os por menores dos dadso
+
+em seguida enviamos os dados pegos e colcados em um array para sua respectiva view
+
+onde utlizando algujns recursos do bootstrap, exibimos na pagina principal os dados coletados de forma elegante
+
+ <div class="container">
+         <hr>
+        <h1> Perguntas</h1>
+         <hr>
+         <a href="/perguntar" class="btn btn-primary">Perguntar</a>
+         <hr>
+        <% perguntas.forEach(pergunta => { %>
+            <br>
+            <div class="card">
+                <div class="card-body">
+                    <h3> <%= pergunta.titulo %> </h3>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary"> Responder</button>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+
+Agora vamos ordenar a nosssa busca para que fique com a pergunta mais recente no topo (tipo o Yahoo)
+vamos fazer isso usando o ID(q tem no sql)cada nova pergunta ganha um novo id (o novo, 4,5,6)
+dp maior id para o menor
+para isso vamo adcionar 
+Pergunta.findAll({ raw: true, order:[
+        ['id', 'DESC'] //pelo nome do campo (id, title, etc)- asc ou desc
+    ] }).
+id é a forma que iremos ordenar
+DESC siginifca DEscrescente
+ASC significaria crescente
+
+
+Vamos desenvolver a PAGINA DA PERGUNTA
+/pergunta/3 
+
+
+app.get("/pergunta/:id", (req, res)=>{ //parametroid
+    var id = req.params.id //pegando o id(parametro)
+    //buscar pelo id q o usuer digito -> na tabela 
+    Pergunta.findOne({ //findOne é um metodo do sequelize que busca 1 dado com a condição que for passada
+        where: {id: id} //uma pergunta que tenha o id igual o id que digitei na url {titulo: 'tres porquinhos'}
+    }).then(pergunta =>{ //quando achar, vai chamar o then e passar a pergunta que foi achada (se n achar vai dar null)
+        if(pergunta != undefined) { //Pergunta achada
+            res.render("pergunta")
+        }else{ //não encontrada
+            res.redirect('/')
+        }
+    })
+})
+
+
+Criamos link no id de cada pergunta com um href para poder passar de forma dinamica
+<a href="/pergunta/ <%= pergunta.id %>">
+
+
+Para inserir respostas, usaremos um relacionamento entre tabelas da forma mais simpoles possoivel
+
+<input type="hidden" name="pergunta" value="<%= pergunta.id %>">
+        <button type="submit" class="btn btn-success"> Responder </button> //hidden campo escondido
+
+
